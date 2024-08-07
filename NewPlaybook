@@ -1,0 +1,23 @@
+---
+- name: Ping all ships to check connectivity
+  hosts: test_ship
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+  gather_facts: no
+  tasks:
+    - name: Ping hosts
+      block:
+        - name: Ping task
+          ansible.builtin.ping:
+          register: ping_result
+          ignore_errors: yes
+      rescue:
+        - name: Display unreachable hosts
+          ansible.builtin.debug:
+            msg: "{{ inventory_hostname }} ({{ ansible_host }}) is not reachable"
+      always:
+        - name: Display ping results for unreachable hosts
+          ansible.builtin.debug:
+            msg: "{{ inventory_hostname }} ({{ ansible_host }}) is reachable"
+          when: ping_result.ping is defined and ping_result.ping == 'pong'
+ 
