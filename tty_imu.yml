@@ -1,0 +1,63 @@
+---
+- name: Check IMU connections and USB devices
+  hosts: unreachable_imu_ships
+  become: yes
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+    imu_not_connected: []
+    ships_with_no_usb: []
+    ships_with_one_usb: []
+    ships_with_two_usb: []
+  gather_facts: no
+
+  tasks:
+    - name: Check for IMU device connection status
+      shell: ls -ll /dev/tty* | grep IMU || true
+      register: imu_result
+      ignore_errors: yes
+
+    - name: Identify ships with IMU not connected
+      set_fact:
+        imu_not_connected: "{{ imu_not_connected + [inventory_hostname] }}"
+      when: "'/dev/ttyIMU:' in imu_result.stdout"
+
+    - name: Display ships with IMU not connected
+      debug:
+        msg: "Ships with IMU not connected: {{ imu_not_connected }}"
+      when: inventory_hostname in imu_not_connected
+
+    - name: Check USB devices on ships with IMU not connected
+      shell: ls /dev/ttyUSB* || true
+      register: usb_result
+      when: inventory_hostname in imu_not_connected
+      ignore_errors: yes
+
+    - name: Identify ships with no USB devices
+      set_fact:
+        ships_with_no_usb: "{{ ships_with_no_usb + [inventory_hostname] }}"
+      when: (usb_result is not defined or usb_result.stdout is not defined or usb_result.stdout == "") and inventory_hostname in imu_not_connected
+
+    - name: Identify ships with one USB device
+      set_fact:
+        ships_with_one_usb: "{{ ships_with_one_usb + [inventory_hostname] }}"
+      when: (usb_result is defined and usb_result.stdout is defined and usb_result.stdout.split() | length == 1) and inventory_hostname in imu_not_connected
+
+    - name: Identify ships with two USB devices
+      set_fact:
+        ships_with_two_usb: "{{ ships_with_two_usb + [inventory_hostname] }}"
+      when: (usb_result is defined and usb_result.stdout is defined and usb_result.stdout.split() | length == 2) and inventory_hostname in imu_not_connected
+
+    - name: Display ships with no USB devices
+      debug:
+        msg: "Ships with no USB devices: {{ ships_with_no_usb }}"
+      when: ships_with_no_usb | length > 0
+
+    - name: Display ships with one USB device
+      debug:
+        msg: "Ships with one USB device: {{ ships_with_one_usb }}"
+      when: ships_with_one_usb | length > 0
+
+    - name: Display ships with two USB devices
+      debug:
+        msg: "Ships with two USB devices: {{ ships_with_two_usb }}"
+      when: ships_with_two_usb | length > 0
