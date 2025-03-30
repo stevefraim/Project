@@ -1,0 +1,40 @@
+---
+- name: Fix TTY IMU
+  hosts: all
+  become: true
+  gather_facts: no
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+  tasks:
+
+    - name: Copy script from local machine to remote hosts
+      copy:
+        src: /etc/ansible/playbooks/project_deploy/fix_imu.sh
+        dest: /tmp/fix_imu.sh
+      ignore_errors: true
+
+    - name: Set execute permission on the script
+      file:
+        path: /tmp/fix_imu.sh
+        mode: '0755'
+      ignore_errors: true
+
+    - name: Run Fix TTY script
+      shell: bash /tmp/fix_imu.sh
+      ignore_errors: true
+
+    - name: Fetch the log file to the local machine
+      fetch:
+        src: /tmp/fix_imu.txt
+        dest: ~/Documents/IMU/fix_imu_logs_{{ inventory_hostname }}.txt
+        flat: yes
+      ignore_errors: true
+
+    - name: Delete the log file and the script file from the remote machine
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/fix_imu.txt
+        - /tmp/fix_imu.sh
+      ignore_errors: true
