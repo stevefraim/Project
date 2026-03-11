@@ -1,2 +1,2 @@
 # Project
-Here I am adding all my scripts and automations that I am working on
+This is my projects where I am developing my coding skills!

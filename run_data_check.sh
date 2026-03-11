@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Inventory file and playbook
-INVENTORY_FILE="/etc/ansible/playbooks/project_deploy/selected_hosts"
+INVENTORY_FILE="/etc/ansible/playbooks/shipmate/selected_hosts"
 
 # List of hosts in the [deploy] group
 echo ""
@@ -12,4 +12,4 @@ echo
 echo ""
 
 
-ansible-playbook -i "$INVENTORY_FILE" fix_tty_playbook.yml -f 50 -T 150
+ansible-playbook -i "$INVENTORY_FILE" data_check_playbook.yml -f 50 -T 150

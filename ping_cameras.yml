@@ -1,0 +1,65 @@
+---
+- name: Ping to all camera devices
+  hosts: ping-camera 
+  become: yes
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+  gather_facts: no
+
+  tasks:
+    - name: Ping to camera 1
+      shell: ping -c 1 192.168.1.30
+      register: camera_result_1
+      ignore_errors: yes
+
+    - name: Ping to camera 2
+      shell: ping -c 1 192.168.1.31
+      register: camera_result_2
+      ignore_errors: yes
+
+    - name: Ping to camera 3
+      shell: ping -c 1 192.168.1.32
+      register: camera_result_3
+      ignore_errors: yes
+
+    - name: Ping to camera 4
+      shell: ping -c 1 192.168.1.89
+      register: camera_result_4
+      ignore_errors: yes
+
+    - name: Ping to camera 5
+      shell: ping -c 1 192.168.1.90
+      register: camera_result_5
+      ignore_errors: yes
+
+    - name: Ping to camera 6
+      shell: ping -c 1 192.168.1.91
+      register: camera_result_6
+      ignore_errors: yes
+
+    - name: Ping to camera 7
+      shell: ping -c 1 192.168.1.92
+      register: camera_result_7
+      ignore_errors: yes
+
+    - name: Ping to camera 8
+      shell: ping -c 1 192.168.1.93
+      register: camera_result_8
+      ignore_errors: yes
+
+    - name: Display ping results for all camera devices
+      ansible.builtin.debug:
+        msg: |
+          Camera 1 (192.168.1.30): {{ 'Reachable' if result_camera_1.rc == 0 else 'Unreachable' }}
+          Camera 2 (192.168.1.31): {{ 'Reachable' if result_camera_2.rc == 0 else 'Unreachable' }}
+          Camera 3 (192.168.1.32): {{ 'Reachable' if result_camera_3.rc == 0 else 'Unreachable' }}
+          Camera 4 (192.168.1.89): {{ 'Reachable' if result_camera_4.rc == 0 else 'Unreachable' }}
+          Camera 5 (192.168.1.90): {{ 'Reachable' if result_camera_5.rc == 0 else 'Unreachable' }}
+          Camera 6 (192.168.1.91): {{ 'Reachable' if result_camera_6.rc == 0 else 'Unreachable' }}
+          Camera 7 (192.168.1.92): {{ 'Reachable' if result_camera_7.rc == 0 else 'Unreachable' }}
+          Camera 8 (192.168.1.93): {{ 'Reachable' if result_camera_8.rc == 0 else 'Unreachable' }}
+
+
+      
+
+    

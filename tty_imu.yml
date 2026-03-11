@@ -1,6 +1,6 @@
 ---
 - name: Check IMU connections and USB devices
-  hosts: unreachable_imu_ships
+  hosts: ships_with_new_imu
   become: yes
   vars:
     ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'

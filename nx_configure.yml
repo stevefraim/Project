@@ -1,0 +1,40 @@
+---
+- name: Configure the cfg file and add user to the NoMachine server
+  hosts: unreachable_and_failed_ships
+  become: true
+  gather_facts: no
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+    nx_password: "Orca123"
+  
+  tasks:
+    - name: Ensure EnablePasswordDB is set to 1 (uncommented)
+      ansible.builtin.lineinfile:
+        path: /usr/NX/etc/server.cfg
+        regexp: '^#?\s*EnablePasswordDB\s*[01]'
+        line: 'EnablePasswordDB 1'
+        state: present  #If the line is in the file it is replaced (if not, its added)
+    
+    - name: Show EnablePasswordDB line in server.cfg after update
+      ansible.builtin.shell: grep -E '^#?\s*EnablePasswordDB' /usr/NX/etc/server.cfg
+      register: enablepassworddb_line
+
+    - name: Display the line(s) containing EnablePasswordDB
+      debug:
+        var: enablepassworddb_line.stdout_lines
+
+
+    - name: Add NX user with password using expect
+      ansible.builtin.expect: #Automates interaction with programs that prompt for input
+        command: sudo /usr/NX/bin/nxserver --useradd "{{ ansible_user }}"
+        responses:
+          Password: "{{ nx_password }}"
+          "Confirm password:": "{{ nx_password }}"
+        timeout: 30
+      register: nxuser_add
+
+    - name: Show the output from user creation 
+      debug:
+        msg: "{{ nxuser_add.stdout_lines | reject('search', nx_password) | list }}"
+
+

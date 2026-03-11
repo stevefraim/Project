@@ -1,0 +1,27 @@
+---
+- name: Pull Config
+  hosts: ships
+  become: true
+  ignore_unreachable: yes
+  gather_facts: no   # Disable fact gathering
+  vars:
+    ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+  tasks:
+
+    - name: Copy script from local machine to remote hosts
+      copy:
+        src: /etc/ansible/scripts/pull_config.sh
+        dest: /tmp/pull_config.sh
+      ignore_errors: true
+
+
+    - name: Set execute permission on the script
+      file:
+        path: /tmp/pull_config.sh
+        mode: '0755'
+      ignore_errors: true
+
+
+    - name: Run Pull Config script
+      shell: bash /tmp/pull_config.sh
+      ignore_errors: true

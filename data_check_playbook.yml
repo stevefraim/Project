@@ -1,5 +1,5 @@
 ---
-- name: Fix TTY IMU
+- name: Data Upload Check
   hosts: all
   become: true
   gather_facts: no
@@ -9,24 +9,24 @@
 
     - name: Copy script from local machine to remote hosts
       copy:
-        src: /etc/ansible/playbooks/project_deploy/fix_imu.sh
-        dest: /tmp/fix_imu.sh
+        src: /etc/ansible/playbooks/shipmate/script/data_check.sh
+        dest: /tmp/data_check.sh
       ignore_errors: true
 
     - name: Set execute permission on the script
       file:
-        path: /tmp/fix_imu.sh
+        path: /tmp/data_check.sh
         mode: '0755'
       ignore_errors: true
 
-    - name: Run Fix TTY script
-      shell: bash /tmp/fix_imu.sh
+    - name: Run Data Check script
+      shell: bash /tmp/data_check.sh
       ignore_errors: true
 
     - name: Fetch the log file to the local machine
       fetch:
-        src: /tmp/fix_imu.txt
-        dest: ~/Documents/IMU/fix_imu_logs_{{ inventory_hostname }}.txt
+        src: /tmp/logs.txt
+        dest: ~/Documents/Data Upload Check/data_upload_logs_{{ inventory_hostname }}.txt
         flat: yes
       ignore_errors: true
 
@@ -35,6 +35,7 @@
         path: "{{ item }}"
         state: absent
       loop:
-        - /tmp/fix_imu.txt
-        - /tmp/fix_imu.sh
+        - /tmp/data_logs.txt
+        - /tmp/logs.txt
+        - /tmp/data_check.sh
       ignore_errors: true
